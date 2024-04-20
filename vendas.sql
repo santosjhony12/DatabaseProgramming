@@ -68,4 +68,3 @@ cli_cod = 2 WHERE ped_id = 2;
 
 
 SELECT p.ped_id, p.ped_data, c.cli_nome from cliente c, pedido p WHERE p.cli_cod = c.cli_cod;
-

@@ -63,6 +63,42 @@ CREATE TABLE item_pedido (
        FOREIGN KEY (pro_codigo) REFERENCES produto (pro_codigo), 
        FOREIGN KEY (ped_numero) REFERENCES pedido (ped_numero)
 );
+use venda2;
+create table departamento
+(dep_id int primary key,
+ dep_descricao varchar(30));
+drop table departamento;
+
+create table departamento(
+	dep_id int primary key,
+	dep_descricao varchar(30));
+
+create table funcionario
+(fun_cod int primary key,
+ fun_nome varchar(20),
+ fun_sal decimal(10,2),
+ dep_id int references departamento (dep_id));
+
+create table telefone2
+(tel_codigo int primary key,
+ func_cod int references funcionario(func_cod),
+ tel_numero int );
+
+insert into departamento values (1,'RH');
+insert into departamento values (2,'Vendas');
+insert into departamento values (3,'Informática');
+insert into departamento values (4,'Compras');
+
+insert into funcionario values (1,'Paulo',4000.00,1);
+insert into funcionario values (2,'Maria',1500.00,2);
+insert into funcionario values (3,'João',4000.00,1);
+insert into funcionario values (4,'Laura',5000.00,2);
+insert into funcionario values (5,'Ana',6000.00,3);
+insert into funcionario values (6,'Maria',null,null);
+
+
+insert into telefone2 values (1,1,39231546);
+insert into telefone2 values (2,2,97858999);
 
 
 insert into vendedor (ven_nome,ven_salario_fixo)
@@ -118,7 +154,58 @@ SELECT p.prod_descricao, p.pro_valor_unidade, p.pro_valor_unidade*1.1 as valor_a
 commit; /*CONFIRMA A TRANSAÇÃO*/
 
 SELECT * FROM pedido where ped_data = '2000-10-07';
-
 SELECT count(*) as quant_cliente FROM cliente;
-
 SELECT c.cli_nome, p.ped_data FROM cliente c, pedido p WHERE c.cli_codigo = p.cli_codigo;
+
+use venda2;
+/*COM INNER JOIN*/
+SELECT c.cli_nome, p.ped_data from cliente c inner join pedido p on c.cli_codigo = p.cli_codigo;
+
+/*COM WHERE*/
+SELECT c.cli_codigo, c.cli_nome, t.tel_numero
+from cliente c, telefone t where c.cli_codigo = t.cli_codigo;
+
+/*COM INNER JOIN*/
+SELECT c.cli_codigo, c.cli_nome, t.tel_numero
+from cliente c inner join telefone t on c.cli_codigo = t.cli_codigo;
+
+/*COM LEFT JOIN - > LEFT JOIN A PRINCIPAL COLUNA QUE EU ME IMPORTO É A DA ESQUERDA, NESSE CASO, CLIENTE. 
+ENTÃO, MESMO QUE O TELEFONE SEJA NULO, RETORNO TODOS OS CLIENTES*/
+SELECT c.cli_codigo, c.cli_nome, t.tel_numero
+from cliente c left outer join telefone t on c.cli_codigo = t.cli_codigo;
+
+/*COM RIGHT JOIN*/
+SELECT c.cli_codigo, c.cli_nome, t.tel_numero
+from cliente c right outer join telefone t on c.cli_codigo = t.cli_codigo;
+
+/*COM RIGHT JOIN*/
+SELECT c.cli_codigo, c.cli_nome, t.tel_numero
+from telefone t right outer join cliente c on c.cli_codigo = t.cli_codigo;
+
+SELECT f.fun_cod, f.fun_nome, d.dep_descricao from funcionario f right outer join departamento d
+on f.dep_id = d.dep_id;
+
+/*VERIFICANDO COM OS ID'S NULL*/
+SELECT f.fun_cod, f.fun_nome, d.dep_descricao from departamento d left outer join funcionario f
+on f.dep_id = d.dep_id where f.dep_id is null;
+
+SELECT f.fun_cod, f.fun_nome, d.dep_descricao from departamento d right outer join funcionario f
+on f.dep_id = d.dep_id where f.dep_id is null;
+
+
+/*UNIR SELECTS COM ESTRUTURAS IGUAIS*/
+SELECT f.fun_cod, f.fun_nome, d.dep_descricao from departamento d left outer join funcionario f
+on f.dep_id = d.dep_id where f.dep_id is null
+union
+SELECT f.fun_cod, f.fun_nome, d.dep_descricao from departamento d right outer join funcionario f
+on f.dep_id = d.dep_id where f.dep_id is null;
+
+/*JUNÇÃO COM MAIS DE 2 TABELAS*/
+SELECT f.fun_cod, f.fun_nome, d.dep_descricao, t.tel_numero from departamento d right outer join funcionario f
+on f.dep_id = d.dep_id left outer join telefone2 t on t.func_cod = f.fun_cod order by f.fun_cod;
+
+SELECT f.fun_cod, f.fun_nome, d.dep_descricao, t.tel_numero from departamento d left outer join funcionario f
+on f.dep_id = d.dep_id inner join telefone2 t on t.func_cod = f.fun_cod order by f.fun_cod;
+
+SELECT f.fun_cod, f.fun_nome, d.dep_descricao, t.tel_numero from departamento d left outer join funcionario f
+on f.dep_id = d.dep_id left outer join telefone2 t on t.func_cod = f.fun_cod;
