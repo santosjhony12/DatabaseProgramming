@@ -207,5 +207,96 @@ on f.dep_id = d.dep_id left outer join telefone2 t on t.func_cod = f.fun_cod ord
 SELECT f.fun_cod, f.fun_nome, d.dep_descricao, t.tel_numero from departamento d left outer join funcionario f
 on f.dep_id = d.dep_id inner join telefone2 t on t.func_cod = f.fun_cod order by f.fun_cod;
 
-SELECT f.fun_cod, f.fun_nome, d.dep_descricao, t.tel_numero from departamento d left outer join funcionario f
-on f.dep_id = d.dep_id left outer join telefone2 t on t.func_cod = f.fun_cod;
+SELECT 
+	f.fun_cod, 
+	f.fun_nome, 
+	d.dep_descricao, 
+	t.tel_numero 
+from departamento d 
+left outer join funcionario f
+on f.dep_id = d.dep_id 
+left outer join telefone2 t 
+on t.func_cod = f.fun_cod;
+
+
+CREATE TABLE faixa_salarial(
+	fa_cod varchar(1) primary key,
+    fa_menor decimal(6,2),
+    fa_maior decimal(6,2)
+);
+INSERT INTO faixa_salarial values ('A', 1000.00, 2999.0);
+INSERT INTO faixa_salarial values ('B', 3000.00, 5999.0);
+INSERT INTO faixa_salarial values ('C', 6000.00, 9999.0);
+
+/*O BETWEEN É INCLUSIVE PARA AMBOS OS LADOS*/
+SELECT 
+	f.fun_cod, 
+	f.fun_nome, 
+	f.fun_sal, 
+	fa.fa_cod
+FROM 
+	funcionario f, 
+	faixa_salarial fa
+WHERE f.fun_sal 
+BETWEEN fa.fa_menor AND fa.fa_maior;
+
+/*AUTOJUNÇÕES*/
+ALTER TABLE funcionario
+ADD gerente_cod int;
+
+ALTER TABLE funcionario
+ADD CONSTRAINT FOREIGN KEY(gerente_cod)
+REFERENCES funcionario(fun_cod);
+
+UPDATE funcionario
+SET gerente_cod = 5 WHERE fun_cod IN (1,2,3,4);
+
+SELECT f.fun_nome AS FUNCIONARIO, g.fun_nome AS GERENTE 
+FROM funcionario f, funcionario g
+WHERE f.gerente_cod = g.fun_cod;
+
+/*SINTAXE DE FUNÇÃO DE GRUPO*/
+DELETE FROM funcionario where fun_cod = 6;
+
+SELECT ROUND(AVG(fun_sal),2) AS MÉDIA FROM FUNCIONARIO WHERE DEP_ID = 1;
+
+SELECT ROUND(SUM(FUN_SAL),2) AS SOMA FROM FUNCIONARIO WHERE DEP_ID = 2;
+
+SELECT ROUND(AVG(FUN_SAL),2) AS MÉDIA, ROUND(SUM(FUN_SAL),2) AS SOMA
+FROM FUNCIONARIO;
+
+SELECT ROUND(MIN(FUN_SAL),2) AS MINIMO, ROUND(MAX(FUN_SAL),2)
+FROM FUNCIONARIO;
+
+SELECT COUNT(*) AS 'QUANT. DE FUNCIONARIOS DE UM DEP.' FROM FUNCIONARIO WHERE DEP_ID = 1;
+
+SELECT COUNT(dep_id) AS 'QUANT. DE DEPARTAMENTOS'FROM FUNCIONARIO;
+
+SELECT COUNT(DISTINCT DEP_ID) 'QUANT. DE DEPART. SEM REPET' FROM FUNCIONARIO;
+
+SELECT DEP_ID, ROUND(AVG(FUN_SAL),2), dep_descricao FROM FUNCIONARIO GROUP BY DEP_ID;
+
+SELECT 
+	f.DEP_ID, 
+	ROUND(AVG(f.FUN_SAL),2), 
+	d.dep_descricao 
+FROM 
+	FUNCIONARIO f, 
+	DEPARTAMENTO d 
+WHERE f.dep_id = d.dep_id 
+GROUP BY f.DEP_ID;
+
+/*PARA FINTRAR COM GRUPO USAMOS O HAVING AO INVÉS DE WHERE*/
+SELECT 
+	f.DEP_ID, 
+	ROUND(AVG(f.FUN_SAL),2)
+FROM 
+	FUNCIONARIO f
+GROUP BY f.DEP_ID
+HAVING AVG(f.fun_sal) > 3500;
+
+/*DUPLO SELECT*/
+SELECT 
+	fun_nome
+FROM funcionario 
+WHERE FUN_SAL = (SELECT MAX(FUN_SAL) FROM FUNCIONARIO);
