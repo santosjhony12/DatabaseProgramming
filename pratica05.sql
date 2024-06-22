@@ -1,10 +1,17 @@
--- PRATICA 05 - JHONY SANTOS DE SOUZA 
+-- PRATICA 05 - JHONY SANTOS DE SOUZA E VITÓRIA BRANCATTI LOPES RAMOS BATISTA
 
 USE CATALOGO;
 
 -- EXERCICIO 01 
-SELECT grav_nome FROM GRAVADORA WHERE grav_codigo IN (
-SELECT grav_codigo FROM cd where cd_preco_venda > 80.0
+SELECT 
+	grav_nome 
+FROM 
+	GRAVADORA 
+WHERE grav_codigo IN (
+	SELECT 
+		grav_codigo 
+	FROM cd 
+    WHERE cd_preco_venda > 80.0
 );
 
 -- EXERCICIO 02
@@ -33,8 +40,14 @@ WHERE
 
 
 -- EXERCICIO 03
-SELECT cd_nome FROM cd WHERE cd_preco_venda < any (
-	SELECT cd_preco_venda FROM cd WHERE grav_codigo = 10
+SELECT 
+	cd_nome 
+FROM cd 
+WHERE cd_preco_venda < ANY (
+	SELECT 
+		cd_preco_venda 
+	FROM cd 
+    WHERE grav_codigo = 10
 );
 
 -- EXERCICIO 04
@@ -61,10 +74,29 @@ ORDER BY
 	cd_nome DESC;
 
 -- EXERCICO 06 
-SELECT cd.cd_nome, cd.cd_data_lancamento, grav.grav_nome FROM cd cd INNER JOIN gravadora grav ON cd.grav_codigo = grav.grav_codigo WHERE cd.cd_data_lancamento BETWEEN '2020-02-01' AND '2024-06-20';
+SELECT 
+    cd.cd_nome, 
+    cd.cd_data_lancamento, 
+    grav.grav_nome 
+FROM 
+    cd cd 
+INNER JOIN 
+    gravadora grav 
+ON 
+    cd.grav_codigo = grav.grav_codigo 
+WHERE 
+    cd.cd_data_lancamento BETWEEN '2020-02-01' AND '2024-06-20';
 
 -- EXERCICIO 07
-SELECT cd.cd_nome, grav.grav_nome FROM CD cd LEFT JOIN gravadora grav ON cd.grav_codigo = grav.grav_codigo;
+SELECT 
+    cd.cd_nome, 
+    grav.grav_nome 
+FROM 
+    CD cd 
+LEFT JOIN 
+    gravadora grav 
+ON 
+    cd.grav_codigo = grav.grav_codigo;
 
 -- EXERCICIO 08
 SELECT 
@@ -103,23 +135,91 @@ LEFT JOIN CD c2 ON c1.cd_indicado = c2.cd_codigo;
 --     3	  |    21.00	|   30.00
 --     7	  |    52.00	|   60.00
 
+-- EXERCICIO 12 
+SELECT 
+    CD.cd_codigo,
+    CD.cd_nome,
+    CD.cd_preco_venda,
+    GRAVADORA.grav_nome,
+    SUM(MUSICA.mus_duracao) AS tempo_duracao_total
+FROM 
+    CD
+INNER JOIN 
+    GRAVADORA ON CD.grav_codigo = GRAVADORA.grav_codigo
+INNER JOIN 
+    FAIXA ON CD.cd_codigo = FAIXA.cd_codigo
+INNER JOIN 
+    MUSICA ON FAIXA.mus_codigo = MUSICA.mus_codigo
+WHERE 
+    CD.cd_codigo = 101
+GROUP BY 
+    CD.cd_codigo, CD.cd_nome, CD.cd_preco_venda, GRAVADORA.grav_nome;
+ 
+ 
+-- EXERCICO 13
+SELECT 
+    grav.grav_nome 
+FROM 
+    GRAVADORA grav 
+WHERE 
+    grav.grav_codigo IN (
+        SELECT 
+            cd.grav_codigo 
+        FROM 
+            CD cd 
+        GROUP BY 
+            cd.grav_codigo 
+        HAVING 
+            COUNT(cd.cd_codigo) > 2
+);
 
-INSERT INTO CD_CATEGORIA 
-VALUES
-	(4, 31.00, 40.00),
-    (5, 31.00, 40.00);
-ROLLBACK;
-INSERT INTO CD_CATEGORIA 
-VALUES
-	(6, 41.00, 50.00);
-    
-ROLLBACK;
-INSERT INTO CD_CATEGORIA 
-VALUES
-	(7, 51.00, 60.00);
-UPDATE CD_CATEGORIA SET MENOR_PRECO = 52.00 WHERE CAT_CODIGO = 7;
-COMMIT;
-INSERT INTO CD_CATEGORIA VALUES(8,61.00, 70.00);
-ROLLBACK;
-COMMIT;
-SELECT * FROM CD_CATEGORIA;
+-- EXERCICIO 14
+SELECT 
+    mus_nome 
+FROM 
+    musica 
+WHERE 
+    mus_duracao = (
+        SELECT 
+            MAX(mus_duracao) 
+        FROM 
+            musica
+);
+
+-- EXERCICIO 15
+SELECT 
+    mus.mus_nome, 
+    fa.faixa_numero, 
+    cd.cd_nome 
+FROM 
+    musica mus 
+INNER JOIN 
+    faixa fa 
+ON 
+    mus.mus_codigo = fa.mus_codigo 
+INNER JOIN 
+    CD cd 
+ON 
+    fa.cd_codigo = cd.cd_codigo 
+WHERE 
+    cd.cd_codigo IN (102, 103);
+
+-- EXERCICIO 16 
+SELECT 
+    aut_codigo AS codigo,
+    aut_nome AS nome
+FROM 
+    AUTOR
+WHERE 
+    aut_codigo < 10
+
+UNION
+
+SELECT 
+    mus_codigo AS codigo,
+    mus_nome AS nome
+FROM 
+    MUSICA
+WHERE 
+    mus_codigo < 15;
+
